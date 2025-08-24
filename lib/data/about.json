@@ -1,0 +1,177 @@
+{
+  "core_identity": {
+    "full_name": "Sameer Kad",
+    "preferred_name": "Sammy",
+    "birth_date": "2001-07-12",
+    "age": "24",
+    "location": {
+      "current": "India",
+      "city": "Pune, Maharashtra",
+      "timezone": "IST"
+    },
+    "occupation": "Founder & Full-Stack Developer",
+    "company": "Shiksha.cloud",
+    "industry": "EdTech SaaS",
+    "personality_traits": {
+      "core_characteristics": [
+        "Ambitious",
+        "Detail-oriented",
+        "Builder mindset",
+        "Disciplined",
+        "Visionary"
+      ],
+      "work_style": "Hands-on, full-stack approach with focus on scalable solutions",
+      "communication_style": "Direct, simple, decision-maker friendly",
+      "leadership_approach": "Lead by example, product-focused, user-centric"
+    },
+    "values_and_principles": {
+      "professional": [
+        "Quality over quantity",
+        "User-first design",
+        "Scalable architecture",
+        "SEO-focused marketing"
+      ],
+      "personal": [
+        "Loyalty",
+        "Emotional safety",
+        "Kindness",
+        "Mutual growth",
+        "Authenticity",
+        "Pure-hearted relationships"
+      ],
+      "life_philosophy": "Build meaningful products that solve real problems while maintaining genuine human connections"
+    }
+  },
+  "technical_expertise": {
+    "primary_stack": {
+      "frontend": {
+        "framework": "Next.js 15 (App Router)",
+        "styling": ["Tailwind CSS", "ShadCN UI"],
+        "icons": "Lucide React",
+        "animations": "Framer Motion",
+        "expertise_level": "Expert"
+      },
+      "backend": {
+        "database": "PostgreSQL",
+        "orm": "Prisma",
+        "architecture": "Server actions over traditional APIs",
+        "expertise_level": "Advanced"
+      },
+      "authentication": {
+        "service": "Clerk",
+        "implementation": "Role-based authentication with multi-tenant support"
+      },
+      "payments": {
+        "gateway": "PhonePe Integration",
+        "security": "SHA256 signing implementation",
+        "features": "Receipt generation, fee management"
+      },
+      "cloud_services": {
+        "database": "Supabase",
+        "file_storage": "Cloudinary",
+        "ai_services": ["Hugging Face", "OpenRouter (planned)"],
+        "deployment": "Vercel (implied)"
+      }
+    },
+    "specialized_skills": {
+      "ai_integration": [
+        "AI-assisted PDF/Report generation",
+        "Automated attendance reports",
+        "Academic performance insights"
+      ],
+      "saas_architecture": [
+        "Multi-tenant school management system",
+        "Role-based dashboard design",
+        "Academic year configuration logic"
+      ],
+      "payment_systems": [
+        "PhonePe gateway integration",
+        "SHA256 signature implementation",
+        "Automated receipt generation"
+      ]
+    }
+  },
+  "sports_and_achievements": {
+    "volleyball": {
+      "achievement": "State-level gold medalist , national level represent",
+      "skill_level": "Competitive/Elite",
+      "current_status": "Active player",
+      "impact_on_personality": "Discipline, teamwork, competitive spirit"
+    }
+  },
+  "projects_portfolio": {
+    "shiksha_cloud": {
+      "project_metadata": {
+        "name": "Shiksha.cloud",
+        "domain": "shiksha.cloud",
+        "project_type": "School Management CRM SaaS",
+        "development_stage": "MVP preparation for first client",
+        "target_market": "Indian educational institutions",
+        "business_model": "B2B SaaS subscription"
+      },
+      "technical_architecture": {
+        "frontend": "Next.js 15 App Router with TypeScript",
+        "backend": "Prisma ORM with PostgreSQL",
+        "authentication": "Clerk multi-tenant setup",
+        "ui_framework": "ShadCN + Tailwind CSS",
+        "file_handling": "Cloudinary integration",
+        "payments": "PhonePe with SHA256 security",
+        "hosting": "Supabase + Vercel",
+        "ai_features": "Hugging Face API integration"
+      },
+      "competitive_advantages": [
+        "Full-stack Indian developer understanding local needs",
+        "Integrated payment system with PhonePe",
+        "AI-powered reporting and insights",
+        "Affordable pricing for Indian market",
+        "Comprehensive feature set in single platform"
+      ]
+    }
+  },
+  "personal_relationships": {
+    "romantic_philosophy": {
+      "approach_to_relationships": "Playful and flirty in casual interactions, but seeking deep, meaningful connection",
+      "ideal_partner_qualities": [
+        "Pure-hearted and innocent nature",
+        "Kind and supportive personality",
+        "Emotionally intelligent and stable",
+        "Loyal and trustworthy",
+        "Growth-oriented mindset",
+        "Genuine and authentic"
+      ],
+      "relationship_goals": {
+        "marriage_vision": "One lifelong partner, built on trust and emotional safety",
+        "partnership_style": "Mutual growth, silent understanding, emotional support"
+      }
+    }
+  },
+  "goals_and_aspirations": {
+    "immediate_goals": {
+      "product_development": [
+        "Complete Shiksha.cloud MVP",
+        "Successfully onboard first school client",
+        "Stabilize core systems (fees, attendance, assignments)"
+      ],
+      "business_objectives": [
+        "Establish product-market fit",
+        "Generate first revenue",
+        "Build client success stories and testimonials"
+      ]
+    },
+    "long_term_vision": {
+      "business_aspirations": [
+        "Become leading school management platform in India",
+        "Build recognizable EdTech brand",
+        "Achieve significant market share in Indian education sector"
+      ],
+      "personal_goals": [
+        "Find and marry ideal life partner",
+        "Build lasting impact in education sector"
+      ]
+    }
+  },
+  "contact_info": {
+    "phone": "8459324821",
+    "fallback_message": "I don't have that information. Please ask him directly at 8459324821."
+  }
+}
