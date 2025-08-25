@@ -12,7 +12,7 @@ interface RAGResponse {
 
 export async function searchKnowledge(
   query: string,
-  topK = 2
+  topK = 1
 ): Promise<SearchResult[]> {
   try {
     console.log(`[v0] Searching knowledge for: "${query}"`);
@@ -63,7 +63,7 @@ export async function generateRAGResponse(
 ): Promise<RAGResponse> {
   try {
     // Search for relevant knowledge
-    const searchResults = await searchKnowledge(query, 3);
+    const searchResults = await searchKnowledge(query, 1);
 
     // Define confidence threshold
     const CONFIDENCE_THRESHOLD = 0.1;
@@ -279,11 +279,6 @@ export function isQueryAnswerable(query: string): boolean {
 
   // Patterns that are likely unanswerable
   const unanswerable = [
-    'girlfriend',
-    'dating',
-    'personal life',
-    'private',
-    'secret',
     'family details',
     'address',
     'salary',

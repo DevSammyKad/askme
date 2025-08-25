@@ -8,16 +8,12 @@ import {
 import { Message, MessageContent } from '@/components/ai-elements/message';
 import {
   PromptInput,
-  PromptInputButton,
   PromptInputSubmit,
   PromptInputTextarea,
-  PromptInputToolbar,
-  PromptInputTools,
 } from '@/components/ai-elements/prompt-input';
 import { useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { Response } from '@/components/ai-elements/response';
-import { GlobeIcon } from 'lucide-react';
 import {
   Source,
   Sources,
@@ -33,7 +29,6 @@ import { Loader } from '@/components/ai-elements/loader';
 
 const AiChat = () => {
   const [input, setInput] = useState('');
-  const [webSearch, setWebSearch] = useState(false);
   const { messages, sendMessage, status } = useChat();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -42,9 +37,7 @@ const AiChat = () => {
       sendMessage(
         { text: input },
         {
-          body: {
-            webSearch: webSearch,
-          },
+          body: {},
         }
       );
       setInput('');
@@ -119,23 +112,15 @@ const AiChat = () => {
           <ConversationScrollButton />
         </Conversation>
 
-        <PromptInput onSubmit={handleSubmit} className="mt-4">
+        <PromptInput
+          onSubmit={handleSubmit}
+          className="mt-4 flex items-center px-3"
+        >
           <PromptInputTextarea
             onChange={(e) => setInput(e.target.value)}
             value={input}
           />
-          <PromptInputToolbar>
-            <PromptInputTools>
-              <PromptInputButton
-                variant={webSearch ? 'default' : 'ghost'}
-                onClick={() => setWebSearch(!webSearch)}
-              >
-                <GlobeIcon size={16} />
-                <span>Search</span>
-              </PromptInputButton>
-            </PromptInputTools>
-            <PromptInputSubmit disabled={!input} status={status} />
-          </PromptInputToolbar>
+          <PromptInputSubmit disabled={!input} status={status} />
         </PromptInput>
       </div>
     </div>
