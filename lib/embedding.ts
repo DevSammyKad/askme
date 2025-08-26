@@ -15,7 +15,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     },
   });
 
-  console.log('Embedding', embedding);
+  // console.log('Embedding', embedding);
 
   return embedding;
 }

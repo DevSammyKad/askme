@@ -62,13 +62,13 @@
         "implementation": "Role-based authentication with multi-tenant support"
       },
       "payments": {
-        "gateway": "PhonePe Integration",
+        "gateway": "PhonePe Integration / CashFree / Razorpay ",
         "security": "SHA256 signing implementation",
-        "features": "Receipt generation, fee management"
+        "features": "Receipt generation, fee management , payment collection"
       },
       "cloud_services": {
-        "database": "Supabase",
-        "file_storage": "Cloudinary",
+        "database": "Supabase / NEON , pinecone",
+        "file_storage": "Cloudinary / Uploadthing /AWS",
         "ai_services": ["Hugging Face", "OpenRouter (planned)"],
         "deployment": "Vercel (implied)"
       }
@@ -103,7 +103,7 @@
     "shiksha_cloud": {
       "project_metadata": {
         "name": "Shiksha.cloud",
-        "domain": "shiksha.cloud",
+        "domain": "https://shiksha.cloud",
         "project_type": "School Management CRM SaaS",
         "development_stage": "MVP preparation for first client",
         "target_market": "Indian educational institutions",
@@ -119,6 +119,55 @@
         "hosting": "Supabase + Vercel",
         "ai_features": "Hugging Face API integration"
       },
+      "feature_categories": {
+        "user_management": [
+          "Multi-role dashboards (Student, Teacher, Parent, Admin)",
+          "Role-based permissions and access control",
+          "Profile management and data privacy"
+        ],
+        "academic_operations": [
+          "Attendance tracking and reporting",
+          "Assignment creation and submission system",
+          "Exam and performance management",
+          "Digital mark sheet generation",
+          "Academic year setup and configuration"
+        ],
+        "financial_management": [
+          "Fee structure setup and management",
+          "Payment processing via PhonePe",
+          "Automated receipt generation",
+          "Financial reporting and analytics"
+        ],
+        "communication": [
+          "Notice board and announcements",
+          "Parent-teacher communication system",
+          "Complaint management system",
+          "Role-based notification system"
+        ],
+        "ai_powered_features": [
+          "AI-generated attendance reports",
+          "AI-assisted fee reports",
+          "Academic performance insights",
+          "Automated report generation"
+        ],
+        "future_roadmap": [
+          "Amazon Alexa integration",
+          "Advanced analytics dashboard",
+          "Mobile app development",
+          "Multi-language support"
+        ]
+      },
+
+      "target_audience": {
+        "primary": ["Private schools", "Colleges", "Coaching institutes"],
+        "secondary": ["Government schools", "International schools"],
+        "user_personas": [
+          "School administrators",
+          "Teachers",
+          "Parents",
+          "Students"
+        ]
+      },
       "competitive_advantages": [
         "Full-stack Indian developer understanding local needs",
         "Integrated payment system with PhonePe",
@@ -126,24 +175,143 @@
         "Affordable pricing for Indian market",
         "Comprehensive feature set in single platform"
       ]
+    },
+    "palavi_sanstha": {
+      "project_metadata": {
+        "name": "PalaviSanstha.org",
+        "domain": "https://palavisanstha.org",
+        "project_type": "NGO Website",
+        "status": "Live",
+        "development_stage": "In Production"
+      }
+    },
+    "calysta": {
+      "project_metadata": {
+        "name": "Calysta.in",
+        "domain": "https://calysta.in",
+        "project_type": "Jewelry E-commerce Website",
+        "status": "Live",
+        "development_stage": "In Production"
+      }
+    },
+    "pglights": {
+      "project_metadata": {
+        "name": "PGLights.in",
+        "domain": "https://pglights.in",
+        "project_type": "Lighting Product E-commerce",
+        "status": "Live",
+        "development_stage": "In Production"
+      },
+      "sub_projects": {
+        "admin_dashboard": {
+          "name": "PGLights Admin Dashboard",
+          "url": "https://pglights.in/dashboard",
+          "access": "Admin only"
+        }
+      }
+    },
+    "rsai": {
+      "project_metadata": {
+        "name": "RSAI Main Website",
+        "domain": "https://rsai.co.in",
+        "project_type": "Cube Teaching & Events Website",
+        "status": "Live"
+      },
+      "sub_projects": {
+        "leaderboard_v1": {
+          "name": "RSAI Leaderboard",
+          "url": "https://leaderboard.rsai.co.in",
+          "type": "Public Ranking Dashboard"
+        },
+        "leaderboard_v2": {
+          "name": "Leaderboard V2",
+          "url": "https://leaderboard2-ivory.vercel.app",
+          "type": "Updated Ranking Dashboard"
+        }
+      }
+    },
+    "house_on_the_clouds": {
+      "project_metadata": {
+        "name": "House on the Clouds",
+        "domain": "https://www.houseontheclouds.com",
+        "project_type": "Creative Wedding Studio Reference",
+        "status": "Reference Project"
+      }
+    },
+    "kita_project": {
+      "project_metadata": {
+        "name": "Kita Project",
+        "domain": "https://kita-7.vercel.app",
+        "project_type": "UI Design Project",
+        "status": "Prototype"
+      }
+    },
+    "getbeds": {
+      "project_metadata": {
+        "name": "GetBeds Dashboard",
+        "domain": "https://getbeds-sand.vercel.app/dashboard",
+        "project_type": "Hospital Bed Booking Panel",
+        "status": "Prototype"
+      }
+    },
+    "karan_portfolio": {
+      "project_metadata": {
+        "name": "Karan Portfolio",
+        "domain": "https://karan-portfolio-green.vercel.app",
+        "project_type": "MSW Portfolio Website",
+        "status": "Live"
+      }
+    },
+    "vaishnavi_portfolio": {
+      "project_metadata": {
+        "name": "Vaishnavi Portfolio",
+        "domain": "https://vaishnaviraykar.vercel.app/",
+        "project_type": "MSW Portfolio Website",
+        "status": "Live"
+      }
     }
   },
   "personal_relationships": {
-    "romantic_philosophy": {
-      "approach_to_relationships": "Playful and flirty in casual interactions, but seeking deep, meaningful connection",
-      "ideal_partner_qualities": [
-        "Pure-hearted and innocent nature",
-        "Kind and supportive personality",
-        "Emotionally intelligent and stable",
-        "Loyal and trustworthy",
-        "Growth-oriented mindset",
-        "Genuine and authentic"
-      ],
-      "relationship_goals": {
-        "marriage_vision": "One lifelong partner, built on trust and emotional safety",
-        "partnership_style": "Mutual growth, silent understanding, emotional support"
+    "ideal_partner_qualities": [
+      "Pure-hearted and innocent nature",
+      "Kind and supportive personality",
+      "Emotionally intelligent and stable",
+      "Loyal and trustworthy",
+      "Growth-oriented mindset",
+      "Genuine and authentic"
+    ],
+    "relationship_goals": {
+      "marriage_vision": "One lifelong partner, built on trust and emotional safety",
+      "partnership_style": "Mutual growth, silent understanding, emotional support"
+    },
+    "feelings": {
+      "person": "Ex-colleague (Nik***)",
+      "qualities": ["Pure-hearted", "Innocent", "Kind", "Supportive"],
+      "status": "I have't express feelings to her just want to see every time , when she is smiling, l loved her weird face expression"
+    },
+    "girlfriends": [
+      {
+        "name": "Vaishnavi Raykar",
+        "status": "Breakup",
+        "qualities": ["Pure-hearted", "Kind", "Supportive"],
+        "break_reason": "We had trust issues as sometimes she was not fully honest, which created distance between us.",
+        "type": "Ex"
+      },
+      {
+        "name": "Pratiksha Pote",
+        "status": "Breakup",
+        "qualities": ["Kind", "Supportive"],
+        "break_reason": "After some years, misunderstandings grew between us and we couldn’t maintain the same bond.",
+        "type": "Ex",
+        "Note": "She was my first love."
+      },
+      {
+        "name": "Nik***",
+        "status": "I haven't expressed my feelings to her",
+        "type": "Crush",
+        "reason": "I admired her but never gathered the courage to share my feelings."
       }
-    }
+    ]
   },
   "goals_and_aspirations": {
     "immediate_goals": {

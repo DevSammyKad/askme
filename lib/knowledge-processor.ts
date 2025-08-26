@@ -285,6 +285,84 @@ export function chunkKnowledgeBase(data: any): KnowledgeChunk[] {
       });
     }
   }
+  if (data.personal_relationships) {
+    const rel = data.personal_relationships;
+
+    // ✅ Relationship philosophy (already in your code, keep as is)
+    if (rel.relationship_goals) {
+      chunks.push({
+        id: 'relationships_philosophy',
+        content: `Relationship goals: Marriage vision - ${
+          rel.relationship_goals.marriage_vision
+        }. Partnership style: ${
+          rel.relationship_goals.partnership_style
+        }. Ideal partner qualities: ${rel.ideal_partner_qualities.join(', ')}.`,
+        metadata: {
+          section: 'personal_relationships',
+          subsection: 'philosophy',
+          category: 'personal',
+          keywords: [
+            'relationships',
+            'marriage',
+            'partner',
+            'qualities',
+            'love',
+            'dating',
+            'romance',
+          ],
+        },
+      });
+    }
+
+    // ✅ Current unexpressed feelings
+    if (rel.feelings) {
+      chunks.push({
+        id: 'relationships_feelings',
+        content: `Sameer has feelings for ${
+          rel.feelings.person
+        }. He admires qualities such as ${rel.feelings.qualities.join(
+          ', '
+        )}. Current status: ${rel.feelings.status}.`,
+        metadata: {
+          section: 'personal_relationships',
+          subsection: 'feelings',
+          category: 'personal',
+          keywords: ['crush', 'feelings', 'unspoken', 'love', 'nikita'],
+        },
+      });
+    }
+
+    // ✅ Girlfriends list (past + present + crushes)
+    if (Array.isArray(rel.girlfriends)) {
+      rel.girlfriends.forEach((gf: any, i: number) => {
+        chunks.push({
+          id: `relationships_gf_${i}`,
+          content: `${
+            gf.type === 'Ex'
+              ? 'Ex-girlfriend'
+              : gf.type === 'Unspoken'
+              ? 'Crush'
+              : 'Girlfriend'
+          }: ${gf.name}. Status: ${gf.status}. ${
+            gf.qualities ? `Known qualities: ${gf.qualities.join(', ')}.` : ''
+          } ${gf.Note ? `Note: ${gf.Note}` : ''}`,
+          metadata: {
+            section: 'personal_relationships',
+            subsection: 'girlfriends',
+            category: 'personal',
+            keywords: [
+              'girlfriend',
+              'ex',
+              'crush',
+              'relationship',
+              'love',
+              'dating',
+            ],
+          },
+        });
+      });
+    }
+  }
 
   if (data.contact_info) {
     chunks.push({

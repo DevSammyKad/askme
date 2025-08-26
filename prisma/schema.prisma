@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model UnansweredQuery {
+  id            String   @id @default(uuid()) // Unique ID for each log
+  query         String // The actual user query
+  userId        String? // User id (optional—can be 'anonymous')
+  searchResults Int // Number of Pinecone results returned
+  maxScore      Float // Highest similarity score from Pinecone
+  createdAt     DateTime @default(now()) // Timestamp
+}
+
+model AskedQuestions {
+  id        String   @id @default(uuid()) // Unique ID for each log
+  query     String // The actual user query
+  userId    String? // User id (optional—can be 'anonymous')
+  answered  String
+  createdAt DateTime @default(now())
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  userId    String?
+  createdAt DateTime  @default(now())
+  messages  Message[]
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+
+  role      String // "user" | "assistant" | "system"
+  text      String
+  createdAt DateTime @default(now())
+}
