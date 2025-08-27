@@ -6,9 +6,9 @@ import { index } from '@/lib/pinecone';
 const page = async () => {
   // await processAndStoreKnowledge();
   // await index.deleteAll();
-  // console.log('✅ Knowledge base setup complete!');
 
-  // await generateRAGResponse('what is your age ?');
+  // console.log('PineCone Data Cleared');
+
   return (
     <div className="">
       <AiChat />

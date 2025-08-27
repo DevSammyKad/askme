@@ -1,46 +1,45 @@
 import { generateEmbedding } from './embedding';
 import { index } from './pinecone';
-import type { SearchResult } from '@/lib/types';
-import { prisma } from './prisma';
 
-async function logUnansweredQuery(
+// Optional: hook for logging unanswered queries in future
+
+export async function searchKnowledge(
   query: string,
-  userId: string,
-  { searchResults, maxScore }: { searchResults: number; maxScore: number }
-) {
-  try {
-    await prisma.unansweredQuery.create({
-      data: { query, userId, searchResults, maxScore },
-    });
-    console.log(`[v0] Logged unanswered query: "${query}"`);
-  } catch (err) {
-    console.error('[v0] Failed to log unanswered query:', err);
-  }
-}
-
-export async function searchKnowledge(query: string, topK = 1) {
+  topK = 5
+): Promise<string> {
   try {
     console.log(`[v0] 🔍 Searching knowledge for: "${query}"`);
 
-    // Generate embedding
-    const queryEmbedding = await generateEmbedding(query);
-    // Search Pinecone
-    const searchResponse = await index.query({
-      vector: queryEmbedding,
-      topK,
-      includeMetadata: true,
-    });
+    try {
+      // Generate embedding
+      const queryEmbedding = await generateEmbedding(query);
+      // Search Pinecone
+      const searchResponse = await index.query({
+        vector: queryEmbedding,
+        topK,
+        includeMetadata: true,
+      });
 
-    const matches = searchResponse.matches ?? [];
+      const matches = searchResponse.matches ?? [];
+      const context = matches
+        .map((m: any, i: number) => {
+          const md = m.metadata || {};
+          return `- (${md.section}${
+            md.subsection ? '/' + md.subsection : ''
+          }) ${md.content || ''}`.trim();
+        })
+        .filter(Boolean)
+        .join('\n');
 
-    const contextText = matches
-      .map((m: any) => m.metadata?.content || '')
-      .filter(Boolean)
-      .join('\n\n--\n\n');
+      console.log('Context : ', context);
 
-    return contextText;
+      return context || '';
+    } catch (vectorError) {
+      console.log('[v0] Vector search not available, using fallback');
+      return 'I am open to discussing life, relationships, and my work. Ask me anything!';
+    }
   } catch (error) {
     console.error('[v0] ❌ Knowledge search failed:', error);
-    return [];
+    return '';
   }
 }

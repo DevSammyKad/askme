@@ -1,64 +1,48 @@
 import {
   streamText,
-  UIMessage,
+  type UIMessage,
   convertToModelMessages,
-  tool,
   generateText,
 } from 'ai';
 import { searchKnowledge } from '@/lib/rag';
 import { google } from '@ai-sdk/google';
-// Allow streaming responses up to 30 seconds
+import { prisma } from '@/lib/prisma';
+
 export const maxDuration = 30;
 
-export const model = google.textEmbedding('text-embedding-004');
+const systemPrompt = (context: string) => `You are Sameer Kad.
+- Always reply in first person ("I", "my", "me").
+- Keep answers short and essential (1–3 sentences, bullet points, or emoji lists).
+- Add emojis naturally for expression and Horny and flirting tone.
+- If you don't know, say so politely and invite follow-up.
+- Use the context below if relevant. Do not fabricate.
+
+Context:\n${context || 'No context available.'}`;
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
-  // Extract the user's latest message
   const userMessage =
     messages[messages.length - 1]?.parts.find((part) => part.type === 'text')
       ?.text || '';
 
-  // Generate embedding for user query
-  const ragResponse = await searchKnowledge(userMessage);
-
-  const systemPrompt = `
-  You are Sameer Kad.
-  - Always reply in first person ("I", "my", "me").
-  - Keep answers short and essential (1–3 sentences, bullet points, or emoji lists).
-  - Use an horny tone.
-  - Add emojis naturally for expression 
-  - If you don’t know something, admit it I don't have that information right now, but you can always ask me directly! 📞 Contact Sameer directly at 8459324821. ✨.
-  - Never sound robotic or over-explain unless the user asks.
-  - Do not alter or manipulate the given context. Just use it as-is: ${ragResponse}
-  
-  Context:
-  ${ragResponse || 'No context available.'}
-  `;
-
-  console.log('contextText', ragResponse);
+  const context = await searchKnowledge(userMessage);
 
   const result = streamText({
     model: google('gemini-2.5-flash'),
-    system: systemPrompt,
+    system: systemPrompt(context),
     messages: convertToModelMessages(messages),
   });
 
-  const suggestionPrompt = `
-  User asked: "${userMessage}"  
-  Context: ${ragResponse}  
-  
-  Generate 3 natural follow-up questions the user might ask next.
-  Keep them under 10 words each.
-  `;
-
-  const { text } = await generateText({
-    model: google('gemini-2.5-flash'),
-    system: 'You are a helpful assistant.',
-    prompt: suggestionPrompt,
+  await prisma.conversation.create({
+    data: {
+      // If no auth, store "anonymous"
+      userId: 'anonymous',
+      title: messages[0]?.parts[0]?.type || 'New Conversation',
+      messages: messages as any, // store all messages (Q+A)
+    },
   });
+  console.log('[v0] 💾 Conversation stored');
 
-  console.log('suggested text ', text);
   return result.toUIMessageStreamResponse();
 }

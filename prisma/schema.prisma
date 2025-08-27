@@ -24,27 +24,11 @@ model UnansweredQuery {
   createdAt     DateTime @default(now()) // Timestamp
 }
 
-model AskedQuestions {
-  id        String   @id @default(uuid()) // Unique ID for each log
-  query     String // The actual user query
-  userId    String? // User id (optional—can be 'anonymous')
-  answered  String
-  createdAt DateTime @default(now())
-}
-
 model Conversation {
-  id        String    @id @default(cuid())
-  userId    String?
-  createdAt DateTime  @default(now())
-  messages  Message[]
-}
-
-model Message {
-  id             String       @id @default(cuid())
-  conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [id])
-
-  role      String // "user" | "assistant" | "system"
-  text      String
+  id        String   @id @default(cuid())
+  userId    String
+  title     String?
+  messages  Json[]
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

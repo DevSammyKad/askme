@@ -1,27 +1,34 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
-import { KnowledgeChunk } from './types';
+import { KnowledgeChunk, KnowledgeBase, Project } from './types';
 import { generateEmbedding } from './embedding';
 import { index } from './pinecone';
 
-export async function loadKnowledgeBase(): Promise<any> {
+export async function loadKnowledgeBase(): Promise<KnowledgeBase> {
   const filePath = path.join(process.cwd(), 'lib/data/about.json');
   const fileContent = await readFile(filePath, 'utf-8');
   return JSON.parse(fileContent);
 }
 
-export function chunkKnowledgeBase(data: any): KnowledgeChunk[] {
+export function chunkKnowledgeBase(data: KnowledgeBase): KnowledgeChunk[] {
   const chunks: KnowledgeChunk[] = [];
 
-  if (data.core_identity) {
-    const identity = data.core_identity;
+  // Core Identity Processing
+  if (data.identity) {
+    const identity = data.identity;
 
     // Basic info chunk
     chunks.push({
       id: 'identity_basic',
-      content: `${identity.full_name} (${identity.preferred_name}) is a ${identity.age}-year-old ${identity.occupation} from ${identity.location.city}, ${identity.location.current}. He works at ${identity.company} in the ${identity.industry} industry.`,
+      content: `${identity.full_name} (${identity.preferred_name}) is a ${
+        identity.age
+      }-year-old ${identity.occupation} from ${
+        identity.location
+      }. He works at ${identity.company} in the ${identity.industry?.join(
+        ', '
+      )} industry.`,
       metadata: {
-        section: 'core_identity',
+        section: 'identity',
         subsection: 'basic_info',
         category: 'personal',
         keywords: [
@@ -32,25 +39,40 @@ export function chunkKnowledgeBase(data: any): KnowledgeChunk[] {
           'company',
           'sameer',
           'sammy',
+          'kad',
         ],
       },
     });
 
-    // Personality traits chunk
+    // Values and philosophy chunk
     chunks.push({
-      id: 'identity_personality',
-      content: `Sameer's personality traits include: ${identity.personality_traits.core_characteristics.join(
-        ', '
-      )}. His work style is ${
-        identity.personality_traits.work_style
-      }. He communicates in a ${
-        identity.personality_traits.communication_style
-      } manner and leads with a ${
-        identity.personality_traits.leadership_approach
-      } approach.`,
+      id: 'identity_values',
+      content: `Sameer's life philosophy: ${
+        identity.life_philosophy
+      }. Core values: ${identity.values?.join(', ')}.`,
       metadata: {
-        section: 'core_identity',
-        subsection: 'personality',
+        section: 'identity',
+        subsection: 'values',
+        category: 'personal',
+        keywords: ['values', 'philosophy', 'beliefs', 'principles'],
+      },
+    });
+  }
+
+  // Personality Processing
+  if (data.personality) {
+    const personality = data.personality;
+
+    chunks.push({
+      id: 'personality_traits',
+      content: `Sameer's personality traits: ${personality.traits?.join(
+        ', '
+      )}. Work style: ${personality.work_style}. Communication: ${
+        personality.communication_style
+      }. Leadership: ${personality.leadership}.`,
+      metadata: {
+        section: 'personality',
+        subsection: 'traits',
         category: 'personal',
         keywords: [
           'personality',
@@ -61,93 +83,139 @@ export function chunkKnowledgeBase(data: any): KnowledgeChunk[] {
         ],
       },
     });
-
-    // Values and philosophy chunk
-    chunks.push({
-      id: 'identity_values',
-      content: `Sameer's professional values: ${identity.values_and_principles.professional.join(
-        ', '
-      )}. Personal values: ${identity.values_and_principles.personal.join(
-        ', '
-      )}. Life philosophy: ${identity.values_and_principles.life_philosophy}`,
-      metadata: {
-        section: 'core_identity',
-        subsection: 'values',
-        category: 'personal',
-        keywords: ['values', 'principles', 'philosophy', 'beliefs'],
-      },
-    });
   }
 
+  // Technical Expertise Processing
   if (data.technical_expertise) {
     const tech = data.technical_expertise;
 
-    chunks.push({
-      id: 'tech_frontend',
-      content: `Frontend expertise: ${
-        tech.primary_stack.frontend.framework
-      } with ${tech.primary_stack.frontend.styling.join(', ')}, ${
-        tech.primary_stack.frontend.icons
-      }, ${tech.primary_stack.frontend.animations}. Expertise level: ${
-        tech.primary_stack.frontend.expertise_level
-      }`,
-      metadata: {
-        section: 'technical_expertise',
-        subsection: 'frontend',
-        category: 'technical',
-        keywords: [
-          'frontend',
-          'nextjs',
-          'tailwind',
-          'shadcn',
-          'react',
-          'framer motion',
-        ],
-      },
-    });
+    // Frontend chunk
+    if (tech.frontend) {
+      chunks.push({
+        id: 'tech_frontend',
+        content: `Frontend expertise: ${
+          tech.frontend.framework
+        } with ${tech.frontend.styling?.join(', ')}, ${tech.frontend.icons}, ${
+          tech.frontend.animations
+        }. Expertise level: ${tech.frontend.expertise}`,
+        metadata: {
+          section: 'technical_expertise',
+          subsection: 'frontend',
+          category: 'technical',
+          keywords: [
+            'frontend',
+            'nextjs',
+            'tailwind',
+            'shadcn',
+            'react',
+            'framer motion',
+          ],
+        },
+      });
+    }
 
-    chunks.push({
-      id: 'tech_backend',
-      content: `Backend expertise: ${tech.primary_stack.backend.database} with ${tech.primary_stack.backend.orm}. Architecture preference: ${tech.primary_stack.backend.architecture}. Expertise level: ${tech.primary_stack.backend.expertise_level}`,
-      metadata: {
-        section: 'technical_expertise',
-        subsection: 'backend',
-        category: 'technical',
-        keywords: [
-          'backend',
-          'postgresql',
-          'prisma',
-          'server actions',
-          'database',
-        ],
-      },
-    });
+    // Backend chunk
+    if (tech.backend) {
+      chunks.push({
+        id: 'tech_backend',
+        content: `Backend expertise: ${tech.backend.database} with ${tech.backend.orm}. Architecture preference: ${tech.backend.architecture}. Expertise level: ${tech.backend.expertise}`,
+        metadata: {
+          section: 'technical_expertise',
+          subsection: 'backend',
+          category: 'technical',
+          keywords: [
+            'backend',
+            'postgresql',
+            'prisma',
+            'server actions',
+            'database',
+          ],
+        },
+      });
+    }
 
-    chunks.push({
-      id: 'tech_auth_payments',
-      content: `Authentication: ${tech.primary_stack.authentication.service} with ${tech.primary_stack.authentication.implementation}. Payments: ${tech.primary_stack.payments.gateway} with ${tech.primary_stack.payments.security}, features include ${tech.primary_stack.payments.features}`,
-      metadata: {
-        section: 'technical_expertise',
-        subsection: 'integrations',
-        category: 'technical',
-        keywords: [
-          'authentication',
-          'clerk',
-          'payments',
-          'phonepe',
-          'security',
-        ],
-      },
-    });
+    // Authentication chunk
+    if (tech.authentication) {
+      chunks.push({
+        id: 'tech_auth',
+        content: `Authentication: ${tech.authentication}`,
+        metadata: {
+          section: 'technical_expertise',
+          subsection: 'authentication',
+          category: 'technical',
+          keywords: ['authentication', 'clerk', 'kinde', 'jwt'],
+        },
+      });
+    }
+
+    // Payments chunk
+    if (tech.payments) {
+      chunks.push({
+        id: 'tech_payments',
+        content: `Payment gateways: ${tech.payments.gateways?.join(
+          ', '
+        )}. Security: ${
+          tech.payments.security
+        }. Features: ${tech.payments.features?.join(', ')}`,
+        metadata: {
+          section: 'technical_expertise',
+          subsection: 'payments',
+          category: 'technical',
+          keywords: ['payments', 'phonepe', 'cashfree', 'razorpay', 'security'],
+        },
+      });
+    }
+
+    // Cloud services chunk
+    if (tech.cloud) {
+      chunks.push({
+        id: 'tech_cloud',
+        content: `Cloud services - Databases: ${tech.cloud.databases?.join(
+          ', '
+        )}. Storage: ${tech.cloud.file_storage?.join(
+          ', '
+        )}. AI: ${tech.cloud.ai_services?.join(', ')}. Deployment: ${
+          tech.cloud.deployment
+        }`,
+        metadata: {
+          section: 'technical_expertise',
+          subsection: 'cloud',
+          category: 'technical',
+          keywords: [
+            'cloud',
+            'supabase',
+            'neon',
+            'cloudinary',
+            'vercel',
+            'aws',
+          ],
+        },
+      });
+    }
+
+    // Specialized skills chunk
+    if (tech.specialized_skills) {
+      chunks.push({
+        id: 'tech_specialized',
+        content: `Specialized skills: ${tech.specialized_skills.join(', ')}`,
+        metadata: {
+          section: 'technical_expertise',
+          subsection: 'specialized',
+          category: 'technical',
+          keywords: ['ai', 'pdf', 'reports', 'saas', 'multi-tenant', 'rag'],
+        },
+      });
+    }
   }
 
-  if (data.sports_and_achievements?.volleyball) {
-    const volleyball = data.sports_and_achievements.volleyball;
+  // Sports Processing
+  if (data.sports?.volleyball) {
+    const volleyball = data.sports.volleyball;
     chunks.push({
       id: 'sports_volleyball',
-      content: `Sameer is a ${volleyball.achievement} in volleyball with ${volleyball.skill_level} skill level. Current status: ${volleyball.current_status}. Impact: ${volleyball.impact_on_personality}`,
+      content: `Sameer is a ${volleyball.achievement} in volleyball. Current status: ${volleyball.status}. Impact: ${volleyball.impact}`,
       metadata: {
-        section: 'sports_and_achievements',
+        section: 'sports',
         subsection: 'volleyball',
         category: 'personal',
         keywords: [
@@ -156,105 +224,185 @@ export function chunkKnowledgeBase(data: any): KnowledgeChunk[] {
           'state champion',
           'gold medal',
           'athlete',
+          'national level',
         ],
       },
     });
   }
 
-  if (data.projects_portfolio?.shiksha_cloud) {
-    const project = data.projects_portfolio.shiksha_cloud;
-
-    chunks.push({
-      id: 'project_shiksha_overview',
-      content: `Shiksha.cloud is a ${project.project_metadata.project_type} for ${project.project_metadata.target_market}. Currently in ${project.project_metadata.development_stage} stage with ${project.project_metadata.business_model} model. Domain: ${project.project_metadata.domain}`,
-      metadata: {
-        section: 'projects_portfolio',
-        subsection: 'shiksha_cloud',
-        category: 'professional',
-        keywords: ['shiksha', 'school management', 'saas', 'edtech', 'crm'],
-      },
-    });
-
-    chunks.push({
-      id: 'project_shiksha_tech',
-      content: `Shiksha.cloud technical stack: ${project.technical_architecture.frontend}, ${project.technical_architecture.backend}, ${project.technical_architecture.authentication}, ${project.technical_architecture.ui_framework}, ${project.technical_architecture.payments}, hosted on ${project.technical_architecture.hosting}`,
-      metadata: {
-        section: 'projects_portfolio',
-        subsection: 'shiksha_tech',
-        category: 'technical',
-        keywords: [
-          'shiksha',
-          'nextjs',
-          'prisma',
-          'clerk',
-          'phonepe',
-          'supabase',
-          'vercel',
-        ],
-      },
-    });
-
-    chunks.push({
-      id: 'project_shiksha_advantages',
-      content: `Shiksha.cloud competitive advantages: ${project.competitive_advantages.join(
-        ', '
-      )}`,
-      metadata: {
-        section: 'projects_portfolio',
-        subsection: 'advantages',
-        category: 'professional',
-        keywords: [
-          'competitive',
-          'advantages',
-          'indian market',
-          'ai powered',
-          'affordable',
-        ],
-      },
-    });
-  }
-
-  if (data.personal_relationships?.romantic_philosophy) {
-    const romance = data.personal_relationships.romantic_philosophy;
-
-    chunks.push({
-      id: 'relationships_philosophy',
-      content: `Relationship approach: ${
-        romance.approach_to_relationships
-      }. Ideal partner qualities: ${romance.ideal_partner_qualities.join(
-        ', '
-      )}. Marriage vision: ${
-        romance.relationship_goals.marriage_vision
-      }. Partnership style: ${romance.relationship_goals.partnership_style}`,
-      metadata: {
-        section: 'personal_relationships',
-        subsection: 'philosophy',
-        category: 'personal',
-        keywords: [
-          'relationships',
-          'marriage',
-          'partner',
-          'love',
-          'dating',
-          'romance',
-        ],
-      },
-    });
-  }
-
-  if (data.goals_and_aspirations) {
-    const goals = data.goals_and_aspirations;
-
-    if (goals.immediate_goals) {
+  // Projects Processing
+  if (data.projects && Array.isArray(data.projects)) {
+    // Main project (Shiksha.cloud)
+    const mainProject = data.projects.find(
+      (p: Project) => p.name === 'Shiksha.cloud'
+    );
+    if (mainProject) {
       chunks.push({
-        id: 'goals_immediate',
-        content: `Immediate product goals: ${goals.immediate_goals.product_development.join(
-          ', '
-        )}. Business objectives: ${goals.immediate_goals.business_objectives.join(
+        id: 'project_shiksha_overview',
+        content: `Shiksha.cloud is a ${mainProject.type} in ${mainProject.stage} stage. Target market: ${mainProject.market}. Business model: ${mainProject.model}. Domain: ${mainProject.domain}`,
+        metadata: {
+          section: 'projects',
+          subsection: 'shiksha_overview',
+          category: 'professional',
+          keywords: ['shiksha', 'school management', 'saas', 'edtech', 'crm'],
+        },
+      });
+
+      chunks.push({
+        id: 'project_shiksha_tech',
+        content: `Shiksha.cloud technical stack: ${mainProject.stack?.join(
           ', '
         )}`,
         metadata: {
-          section: 'goals_and_aspirations',
+          section: 'projects',
+          subsection: 'shiksha_tech',
+          category: 'technical',
+          keywords: [
+            'shiksha',
+            'nextjs',
+            'prisma',
+            'clerk',
+            'phonepe',
+            'supabase',
+            'vercel',
+          ],
+        },
+      });
+
+      if (mainProject.features) {
+        chunks.push({
+          id: 'project_shiksha_features',
+          content: `Shiksha.cloud features - User Management: ${mainProject.features.user_management?.join(
+            ', '
+          )}. Academics: ${mainProject.features.academics?.join(
+            ', '
+          )}. Finance: ${mainProject.features.finance?.join(
+            ', '
+          )}. AI Features: ${mainProject.features.ai_features?.join(', ')}`,
+          metadata: {
+            section: 'projects',
+            subsection: 'shiksha_features',
+            category: 'professional',
+            keywords: ['features', 'attendance', 'payments', 'ai', 'reports'],
+          },
+        });
+      }
+
+      if (mainProject.advantages) {
+        chunks.push({
+          id: 'project_shiksha_advantages',
+          content: `Shiksha.cloud competitive advantages: ${mainProject.advantages.join(
+            ', '
+          )}`,
+          metadata: {
+            section: 'projects',
+            subsection: 'advantages',
+            category: 'professional',
+            keywords: [
+              'competitive',
+              'advantages',
+              'local market',
+              'ai powered',
+              'affordable',
+            ],
+          },
+        });
+      }
+    }
+  }
+
+  // Relationships Processing
+  if (data.relationships) {
+    const rel = data.relationships;
+
+    // Relationship philosophy
+    if (rel.relationship_goals) {
+      chunks.push({
+        id: 'relationships_philosophy',
+        content: `Relationship goals: Marriage - ${
+          rel.relationship_goals.marriage
+        }. Partnership style: ${
+          rel.relationship_goals.partnership
+        }. Ideal partner qualities: ${rel.ideal_partner?.join(', ')}.`,
+        metadata: {
+          section: 'relationships',
+          subsection: 'philosophy',
+          category: 'personal',
+          keywords: [
+            'relationships',
+            'marriage',
+            'partner',
+            'qualities',
+            'love',
+            'dating',
+          ],
+        },
+      });
+    }
+
+    // Current feelings/crush
+    if (rel.crush) {
+      chunks.push({
+        id: 'relationships_crush',
+        content: `Sameer has unexpressed feelings for ${
+          rel.crush.name
+        }. He admires qualities such as ${rel.crush.qualities?.join(
+          ', '
+        )}. Status: ${rel.crush.status}. ${rel.crush.feelings}`,
+        metadata: {
+          section: 'relationships',
+          subsection: 'crush',
+          category: 'personal',
+          keywords: ['crush', 'feelings', 'unexpressed', 'nikita'],
+        },
+      });
+    }
+
+    // Ex-relationships
+    if (rel.ex_relationships && Array.isArray(rel.ex_relationships)) {
+      rel.ex_relationships.forEach((ex: any, i: number) => {
+        chunks.push({
+          id: `relationships_ex_${i}`,
+          content: `Ex-girlfriend: ${ex.name}. Qualities: ${ex.qualities?.join(
+            ', '
+          )}. Reason for breakup: ${ex.reason}. ${
+            ex.note ? `Note: ${ex.note}` : ''
+          }`,
+          metadata: {
+            section: 'relationships',
+            subsection: 'ex_relationships',
+            category: 'personal',
+            keywords: ['ex', 'girlfriend', 'past', 'relationship'],
+          },
+        });
+      });
+    }
+
+    // Family
+    if (rel.family) {
+      chunks.push({
+        id: 'relationships_family',
+        content: `Family: Mother - ${rel.family.mother}. Father - ${
+          rel.family.father
+        }. Sisters: ${rel.family.sister?.join(', ')}.`,
+        metadata: {
+          section: 'relationships',
+          subsection: 'family',
+          category: 'personal',
+          keywords: ['family', 'mother', 'father', 'sister', 'sayali', 'pooja'],
+        },
+      });
+    }
+  }
+
+  // Goals Processing
+  if (data.goals) {
+    if (data.goals.immediate) {
+      chunks.push({
+        id: 'goals_immediate',
+        content: `Immediate goals: ${data.goals.immediate.join(', ')}`,
+        metadata: {
+          section: 'goals',
           subsection: 'immediate',
           category: 'professional',
           keywords: ['goals', 'mvp', 'client', 'revenue', 'immediate'],
@@ -262,17 +410,13 @@ export function chunkKnowledgeBase(data: any): KnowledgeChunk[] {
       });
     }
 
-    if (goals.long_term_vision) {
+    if (data.goals.long_term) {
       chunks.push({
         id: 'goals_longterm',
-        content: `Long-term business aspirations: ${goals.long_term_vision.business_aspirations.join(
-          ', '
-        )}. Personal goals: ${goals.long_term_vision.personal_goals.join(
-          ', '
-        )}`,
+        content: `Long-term goals: ${data.goals.long_term.join(', ')}`,
         metadata: {
-          section: 'goals_and_aspirations',
-          subsection: 'longterm',
+          section: 'goals',
+          subsection: 'long_term',
           category: 'mixed',
           keywords: [
             'long term',
@@ -285,91 +429,14 @@ export function chunkKnowledgeBase(data: any): KnowledgeChunk[] {
       });
     }
   }
-  if (data.personal_relationships) {
-    const rel = data.personal_relationships;
 
-    // ✅ Relationship philosophy (already in your code, keep as is)
-    if (rel.relationship_goals) {
-      chunks.push({
-        id: 'relationships_philosophy',
-        content: `Relationship goals: Marriage vision - ${
-          rel.relationship_goals.marriage_vision
-        }. Partnership style: ${
-          rel.relationship_goals.partnership_style
-        }. Ideal partner qualities: ${rel.ideal_partner_qualities.join(', ')}.`,
-        metadata: {
-          section: 'personal_relationships',
-          subsection: 'philosophy',
-          category: 'personal',
-          keywords: [
-            'relationships',
-            'marriage',
-            'partner',
-            'qualities',
-            'love',
-            'dating',
-            'romance',
-          ],
-        },
-      });
-    }
-
-    // ✅ Current unexpressed feelings
-    if (rel.feelings) {
-      chunks.push({
-        id: 'relationships_feelings',
-        content: `Sameer has feelings for ${
-          rel.feelings.person
-        }. He admires qualities such as ${rel.feelings.qualities.join(
-          ', '
-        )}. Current status: ${rel.feelings.status}.`,
-        metadata: {
-          section: 'personal_relationships',
-          subsection: 'feelings',
-          category: 'personal',
-          keywords: ['crush', 'feelings', 'unspoken', 'love', 'nikita'],
-        },
-      });
-    }
-
-    // ✅ Girlfriends list (past + present + crushes)
-    if (Array.isArray(rel.girlfriends)) {
-      rel.girlfriends.forEach((gf: any, i: number) => {
-        chunks.push({
-          id: `relationships_gf_${i}`,
-          content: `${
-            gf.type === 'Ex'
-              ? 'Ex-girlfriend'
-              : gf.type === 'Unspoken'
-              ? 'Crush'
-              : 'Girlfriend'
-          }: ${gf.name}. Status: ${gf.status}. ${
-            gf.qualities ? `Known qualities: ${gf.qualities.join(', ')}.` : ''
-          } ${gf.Note ? `Note: ${gf.Note}` : ''}`,
-          metadata: {
-            section: 'personal_relationships',
-            subsection: 'girlfriends',
-            category: 'personal',
-            keywords: [
-              'girlfriend',
-              'ex',
-              'crush',
-              'relationship',
-              'love',
-              'dating',
-            ],
-          },
-        });
-      });
-    }
-  }
-
-  if (data.contact_info) {
+  // Contact Information
+  if (data.contact) {
     chunks.push({
       id: 'contact_info',
-      content: `Contact Sameer directly at ${data.contact_info.phone}. ${data.contact_info.fallback_message}`,
+      content: `Contact Sameer directly at ${data.contact.phone}. ${data.contact.fallback}`,
       metadata: {
-        section: 'contact_info',
+        section: 'contact',
         category: 'contact',
         keywords: ['contact', 'phone', 'call', 'reach', 'ask directly'],
       },
@@ -399,7 +466,7 @@ export async function storeKnowledgeInPinecone(
           section: chunk.metadata.section,
           subsection: chunk.metadata.subsection || '',
           category: chunk.metadata.category,
-          keywords: chunk.metadata.keywords.join(','),
+          keywords: chunk.metadata.keywords,
         },
       });
     } catch (error) {
