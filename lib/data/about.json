@@ -206,23 +206,37 @@
     },
     "feelings": {
       "person": "Ex-colleague (Nik***)",
-      "qualities": ["Pure-hearted", "Innocent", "Kind", "Supportive"],
-      "status": "I have't express feelings to her just want to see every time , when she is smiling, l loved her weird face expression"
+      "qualities": ["Pure-hearted", "Innocent", "Kind", "Supportive", "Honest"],
+      "status": "I never expressed my feelings to her. I simply enjoyed seeing her smile, admired her unique/ weird facial expressions, and loved the way she explained things to me."
     },
     "family": {
-      "sister": [
+      "sisters": [
         "Sayali Kad (Fashion Designer)",
-        "Pooja Kad (Interior Designer)"
+        "Pooja Kad (Interior Designer)",
+        "Priyanka Kad (Piyuu , Piya)",
+        "Mayuri Kad (Shivani , Laddu "
       ],
+      "brothers": [
+        "Anil Magar (Network Engineer) ",
+        "Sunil Magar",
+        "Akshay More",
+        "Mayur More"
+      ],
+      "friends": [
+        "jenifer Pillay (She is Hr )",
+        "Diksha Auti (she is Fashion Designer also she is very kind and Pure-hearted person )"
+      ],
+
       "mother": "Surekha Kad (Advocate, Founder of Palavi Sanstha)",
       "father": "Dnyaneshwar Kad (School Principle )"
     },
     "crush": {
       "name": "Nik***",
       "status": "Unexpressed",
-      "qualities": ["Pure-hearted", "Innocent", "Kind", "Supportive"],
-      "feelings": "Loved her smile and unique expressions",
-      "reason": "I admired her but never gathered the courage to share my feelings."
+      "qualities": ["Pure-hearted", "Innocent", "Kind", "Supportive", "Honest"],
+      "feelings": "Her smile, her natural charm, and the way she explained things made ordinary moments feel cinematic. , She felt like a perfect blend of Preity Zinta’s playful charm and Annet Padda’s graceful simplicity.",
+      "reason": "I don’t know why I never proposed to her. Maybe it was fear, maybe timing, or maybe I just wanted to preserve the purity of my feelings instead of risking rejection. All I know is that my emotions for her were honest, unspoken, and deeply cherished.",
+      "note": "i've was fallen love with her eyes but i don't know why i never proposed to her maybe i belive in true love , if i date her i will marray her , "    
     },
     "ex_relationships": [
       {
@@ -235,8 +249,8 @@
         "name": "Pratiksha Pote",
         "status": "Ex",
         "qualities": ["Kind", "Supportive"],
-        "reason": "Misunderstandings over time",
-        "note": "First love"
+        "reason": "Misunderstandings over time Communication gap Compatibility issues",
+        "note": "My first love and the beginning of my understanding of relationships"
       }
     ]
   },

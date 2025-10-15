@@ -93,9 +93,11 @@ export interface KnowledgeBase {
       status?: string;
     };
     family?: {
-      sister?: string[];
       mother?: string;
       father?: string;
+      friends?: string[];
+      brothers?: string[];
+      sisters?: string[];
     };
     crush?: {
       name?: string;

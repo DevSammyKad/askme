@@ -4,6 +4,33 @@ import { KnowledgeChunk, KnowledgeBase, Project } from './types';
 import { generateEmbedding } from './embedding';
 import { index } from './pinecone';
 
+function normalizeText(input: string | undefined | null): string {
+  if (!input) return '';
+  return String(input).replace(/\s+/g, ' ').trim();
+}
+
+function safeJoin(
+  list: Array<string | undefined | null> | undefined,
+  sep = ', '
+): string {
+  if (!Array.isArray(list)) return '';
+  return list
+    .map((v) => normalizeText(v))
+    .filter(Boolean)
+    .join(sep);
+}
+
+function pushChunk(
+  chunks: KnowledgeChunk[],
+  id: string,
+  content: string,
+  metadata: KnowledgeChunk['metadata']
+) {
+  const trimmed = normalizeText(content);
+  if (!trimmed) return;
+  chunks.push({ id, content: trimmed, metadata });
+}
+
 export async function loadKnowledgeBase(): Promise<KnowledgeBase> {
   const filePath = path.join(process.cwd(), 'lib/data/about.json');
   const fileContent = await readFile(filePath, 'utf-8');
@@ -18,16 +45,17 @@ export function chunkKnowledgeBase(data: KnowledgeBase): KnowledgeChunk[] {
     const identity = data.identity;
 
     // Basic info chunk
-    chunks.push({
-      id: 'identity_basic',
-      content: `${identity.full_name} (${identity.preferred_name}) is a ${
-        identity.age
-      }-year-old ${identity.occupation} from ${
+    pushChunk(
+      chunks,
+      'identity_basic',
+      `${identity.full_name} (${identity.preferred_name}) is a ${normalizeText(
+        identity.age as any
+      )}-year-old ${normalizeText(identity.occupation)} from ${normalizeText(
         identity.location
-      }. He works at ${identity.company} in the ${identity.industry?.join(
-        ', '
-      )} industry.`,
-      metadata: {
+      )}. Works at ${normalizeText(identity.company)} in ${safeJoin(
+        identity.industry
+      )}.`,
+      {
         section: 'identity',
         subsection: 'basic_info',
         category: 'personal',
@@ -41,36 +69,57 @@ export function chunkKnowledgeBase(data: KnowledgeBase): KnowledgeChunk[] {
           'sammy',
           'kad',
         ],
-      },
-    });
+      }
+    );
+
+    // Demographics
+    pushChunk(
+      chunks,
+      'identity_demographics',
+      `Birth date: ${normalizeText(
+        identity.birth_date
+      )}. Location: ${normalizeText(identity.location)}. Industries: ${safeJoin(
+        identity.industry
+      )}.`,
+      {
+        section: 'identity',
+        subsection: 'demographics',
+        category: 'personal',
+        keywords: ['birth date', 'location', 'industry', 'demographics'],
+      }
+    );
 
     // Values and philosophy chunk
-    chunks.push({
-      id: 'identity_values',
-      content: `Sameer's life philosophy: ${
+    pushChunk(
+      chunks,
+      'identity_values',
+      `Life philosophy: ${normalizeText(
         identity.life_philosophy
-      }. Core values: ${identity.values?.join(', ')}.`,
-      metadata: {
+      )}. Core values: ${safeJoin(identity.values)}.`,
+      {
         section: 'identity',
         subsection: 'values',
         category: 'personal',
         keywords: ['values', 'philosophy', 'beliefs', 'principles'],
-      },
-    });
+      }
+    );
   }
 
   // Personality Processing
   if (data.personality) {
     const personality = data.personality;
 
-    chunks.push({
-      id: 'personality_traits',
-      content: `Sameer's personality traits: ${personality.traits?.join(
-        ', '
-      )}. Work style: ${personality.work_style}. Communication: ${
+    pushChunk(
+      chunks,
+      'personality_traits',
+      `Personality traits: ${safeJoin(
+        personality.traits
+      )}. Work style: ${normalizeText(
+        personality.work_style
+      )}. Communication: ${normalizeText(
         personality.communication_style
-      }. Leadership: ${personality.leadership}.`,
-      metadata: {
+      )}. Leadership: ${normalizeText(personality.leadership)}.`,
+      {
         section: 'personality',
         subsection: 'traits',
         category: 'personal',
@@ -81,8 +130,8 @@ export function chunkKnowledgeBase(data: KnowledgeBase): KnowledgeChunk[] {
           'communication',
           'leadership',
         ],
-      },
-    });
+      }
+    );
   }
 
   // Technical Expertise Processing
@@ -91,14 +140,15 @@ export function chunkKnowledgeBase(data: KnowledgeBase): KnowledgeChunk[] {
 
     // Frontend chunk
     if (tech.frontend) {
-      chunks.push({
-        id: 'tech_frontend',
-        content: `Frontend expertise: ${
-          tech.frontend.framework
-        } with ${tech.frontend.styling?.join(', ')}, ${tech.frontend.icons}, ${
+      pushChunk(
+        chunks,
+        'tech_frontend',
+        `Frontend: ${normalizeText(tech.frontend.framework)} with ${safeJoin(
+          tech.frontend.styling
+        )}, ${normalizeText(tech.frontend.icons)}, ${normalizeText(
           tech.frontend.animations
-        }. Expertise level: ${tech.frontend.expertise}`,
-        metadata: {
+        )}. Expertise: ${normalizeText(tech.frontend.expertise)}.`,
+        {
           section: 'technical_expertise',
           subsection: 'frontend',
           category: 'technical',
@@ -110,16 +160,21 @@ export function chunkKnowledgeBase(data: KnowledgeBase): KnowledgeChunk[] {
             'react',
             'framer motion',
           ],
-        },
-      });
+        }
+      );
     }
 
     // Backend chunk
     if (tech.backend) {
-      chunks.push({
-        id: 'tech_backend',
-        content: `Backend expertise: ${tech.backend.database} with ${tech.backend.orm}. Architecture preference: ${tech.backend.architecture}. Expertise level: ${tech.backend.expertise}`,
-        metadata: {
+      pushChunk(
+        chunks,
+        'tech_backend',
+        `Backend: ${normalizeText(tech.backend.database)} with ${normalizeText(
+          tech.backend.orm
+        )}. Architecture: ${normalizeText(
+          tech.backend.architecture
+        )}. Expertise: ${normalizeText(tech.backend.expertise)}.`,
+        {
           section: 'technical_expertise',
           subsection: 'backend',
           category: 'technical',
@@ -130,54 +185,55 @@ export function chunkKnowledgeBase(data: KnowledgeBase): KnowledgeChunk[] {
             'server actions',
             'database',
           ],
-        },
-      });
+        }
+      );
     }
 
     // Authentication chunk
     if (tech.authentication) {
-      chunks.push({
-        id: 'tech_auth',
-        content: `Authentication: ${tech.authentication}`,
-        metadata: {
+      pushChunk(
+        chunks,
+        'tech_auth',
+        `Authentication: ${normalizeText(tech.authentication)}`,
+        {
           section: 'technical_expertise',
           subsection: 'authentication',
           category: 'technical',
           keywords: ['authentication', 'clerk', 'kinde', 'jwt'],
-        },
-      });
+        }
+      );
     }
 
     // Payments chunk
     if (tech.payments) {
-      chunks.push({
-        id: 'tech_payments',
-        content: `Payment gateways: ${tech.payments.gateways?.join(
-          ', '
-        )}. Security: ${
+      pushChunk(
+        chunks,
+        'tech_payments',
+        `Payments: ${safeJoin(
+          tech.payments.gateways
+        )}. Security: ${normalizeText(
           tech.payments.security
-        }. Features: ${tech.payments.features?.join(', ')}`,
-        metadata: {
+        )}. Features: ${safeJoin(tech.payments.features)}.`,
+        {
           section: 'technical_expertise',
           subsection: 'payments',
           category: 'technical',
           keywords: ['payments', 'phonepe', 'cashfree', 'razorpay', 'security'],
-        },
-      });
+        }
+      );
     }
 
     // Cloud services chunk
     if (tech.cloud) {
-      chunks.push({
-        id: 'tech_cloud',
-        content: `Cloud services - Databases: ${tech.cloud.databases?.join(
-          ', '
-        )}. Storage: ${tech.cloud.file_storage?.join(
-          ', '
-        )}. AI: ${tech.cloud.ai_services?.join(', ')}. Deployment: ${
-          tech.cloud.deployment
-        }`,
-        metadata: {
+      pushChunk(
+        chunks,
+        'tech_cloud',
+        `Cloud - Databases: ${safeJoin(
+          tech.cloud.databases
+        )}. Storage: ${safeJoin(tech.cloud.file_storage)}. AI: ${safeJoin(
+          tech.cloud.ai_services
+        )}. Deployment: ${normalizeText(tech.cloud.deployment)}.`,
+        {
           section: 'technical_expertise',
           subsection: 'cloud',
           category: 'technical',
@@ -189,32 +245,38 @@ export function chunkKnowledgeBase(data: KnowledgeBase): KnowledgeChunk[] {
             'vercel',
             'aws',
           ],
-        },
-      });
+        }
+      );
     }
 
     // Specialized skills chunk
     if (tech.specialized_skills) {
-      chunks.push({
-        id: 'tech_specialized',
-        content: `Specialized skills: ${tech.specialized_skills.join(', ')}`,
-        metadata: {
+      pushChunk(
+        chunks,
+        'tech_specialized',
+        `Specialized skills: ${safeJoin(tech.specialized_skills)}`,
+        {
           section: 'technical_expertise',
           subsection: 'specialized',
           category: 'technical',
           keywords: ['ai', 'pdf', 'reports', 'saas', 'multi-tenant', 'rag'],
-        },
-      });
+        }
+      );
     }
   }
 
   // Sports Processing
   if (data.sports?.volleyball) {
     const volleyball = data.sports.volleyball;
-    chunks.push({
-      id: 'sports_volleyball',
-      content: `Sameer is a ${volleyball.achievement} in volleyball. Current status: ${volleyball.status}. Impact: ${volleyball.impact}`,
-      metadata: {
+    pushChunk(
+      chunks,
+      'sports_volleyball',
+      `Volleyball: ${normalizeText(
+        volleyball.achievement
+      )}. Status: ${normalizeText(volleyball.status)}. Impact: ${normalizeText(
+        volleyball.impact
+      )}.`,
+      {
         section: 'sports',
         subsection: 'volleyball',
         category: 'personal',
@@ -226,8 +288,8 @@ export function chunkKnowledgeBase(data: KnowledgeBase): KnowledgeChunk[] {
           'athlete',
           'national level',
         ],
-      },
-    });
+      }
+    );
   }
 
   // Projects Processing
@@ -237,23 +299,31 @@ export function chunkKnowledgeBase(data: KnowledgeBase): KnowledgeChunk[] {
       (p: Project) => p.name === 'Shiksha.cloud'
     );
     if (mainProject) {
-      chunks.push({
-        id: 'project_shiksha_overview',
-        content: `Shiksha.cloud is a ${mainProject.type} in ${mainProject.stage} stage. Target market: ${mainProject.market}. Business model: ${mainProject.model}. Domain: ${mainProject.domain}`,
-        metadata: {
+      pushChunk(
+        chunks,
+        'project_shiksha_overview',
+        `Shiksha.cloud is a ${normalizeText(
+          mainProject.type
+        )} in ${normalizeText(
+          mainProject.stage
+        )} stage. Market: ${normalizeText(
+          mainProject.market
+        )}. Model: ${normalizeText(mainProject.model)}. Domain: ${normalizeText(
+          mainProject.domain
+        )}.`,
+        {
           section: 'projects',
           subsection: 'shiksha_overview',
           category: 'professional',
           keywords: ['shiksha', 'school management', 'saas', 'edtech', 'crm'],
-        },
-      });
+        }
+      );
 
-      chunks.push({
-        id: 'project_shiksha_tech',
-        content: `Shiksha.cloud technical stack: ${mainProject.stack?.join(
-          ', '
-        )}`,
-        metadata: {
+      pushChunk(
+        chunks,
+        'project_shiksha_tech',
+        `Shiksha.cloud stack: ${safeJoin(mainProject.stack)}`,
+        {
           section: 'projects',
           subsection: 'shiksha_tech',
           category: 'technical',
@@ -266,35 +336,39 @@ export function chunkKnowledgeBase(data: KnowledgeBase): KnowledgeChunk[] {
             'supabase',
             'vercel',
           ],
-        },
-      });
+        }
+      );
 
       if (mainProject.features) {
-        chunks.push({
-          id: 'project_shiksha_features',
-          content: `Shiksha.cloud features - User Management: ${mainProject.features.user_management?.join(
-            ', '
-          )}. Academics: ${mainProject.features.academics?.join(
-            ', '
-          )}. Finance: ${mainProject.features.finance?.join(
-            ', '
-          )}. AI Features: ${mainProject.features.ai_features?.join(', ')}`,
-          metadata: {
+        pushChunk(
+          chunks,
+          'project_shiksha_features',
+          `Features - User: ${safeJoin(
+            (mainProject.features as any).user_management
+          )}. Academics: ${safeJoin(
+            (mainProject.features as any).academics
+          )}. Finance: ${safeJoin(
+            (mainProject.features as any).finance
+          )}. Communication: ${safeJoin(
+            (mainProject.features as any).communication
+          )}. AI: ${safeJoin(
+            (mainProject.features as any).ai_features
+          )}. Future: ${safeJoin((mainProject.features as any).future)}.`,
+          {
             section: 'projects',
             subsection: 'shiksha_features',
             category: 'professional',
             keywords: ['features', 'attendance', 'payments', 'ai', 'reports'],
-          },
-        });
+          }
+        );
       }
 
       if (mainProject.advantages) {
-        chunks.push({
-          id: 'project_shiksha_advantages',
-          content: `Shiksha.cloud competitive advantages: ${mainProject.advantages.join(
-            ', '
-          )}`,
-          metadata: {
+        pushChunk(
+          chunks,
+          'project_shiksha_advantages',
+          `Competitive advantages: ${safeJoin(mainProject.advantages)}`,
+          {
             section: 'projects',
             subsection: 'advantages',
             category: 'professional',
@@ -305,9 +379,37 @@ export function chunkKnowledgeBase(data: KnowledgeBase): KnowledgeChunk[] {
               'ai powered',
               'affordable',
             ],
-          },
-        });
+          }
+        );
       }
+    }
+
+    // Other projects summarized individually
+    for (const project of data.projects) {
+      if (!project || project.name === 'Shiksha.cloud') continue;
+      const nameSlug = normalizeText(project.name)
+        .toLowerCase()
+        .replace(/\s+/g, '-');
+      pushChunk(
+        chunks,
+        `project_${nameSlug}_overview`,
+        `${normalizeText(project.name)} — ${normalizeText(
+          project.type
+        )}. Status: ${normalizeText(project.status)}. Domain: ${normalizeText(
+          project.domain
+        )}.`,
+        {
+          section: 'projects',
+          subsection: 'overview',
+          category: 'professional',
+          keywords: [
+            'project',
+            normalizeText(project.name),
+            normalizeText(project.type),
+            normalizeText(project.domain),
+          ],
+        }
+      );
     }
   }
 
@@ -317,14 +419,15 @@ export function chunkKnowledgeBase(data: KnowledgeBase): KnowledgeChunk[] {
 
     // Relationship philosophy
     if (rel.relationship_goals) {
-      chunks.push({
-        id: 'relationships_philosophy',
-        content: `Relationship goals: Marriage - ${
+      pushChunk(
+        chunks,
+        'relationships_philosophy',
+        `Relationship goals — Marriage: ${normalizeText(
           rel.relationship_goals.marriage
-        }. Partnership style: ${
+        )}. Partnership: ${normalizeText(
           rel.relationship_goals.partnership
-        }. Ideal partner qualities: ${rel.ideal_partner?.join(', ')}.`,
-        metadata: {
+        )}. Ideal partner: ${safeJoin(rel.ideal_partner)}.`,
+        {
           section: 'relationships',
           subsection: 'philosophy',
           category: 'personal',
@@ -336,85 +439,120 @@ export function chunkKnowledgeBase(data: KnowledgeBase): KnowledgeChunk[] {
             'love',
             'dating',
           ],
-        },
-      });
+        }
+      );
+    }
+
+    // Feelings (person)
+    if (rel.feelings) {
+      pushChunk(
+        chunks,
+        'relationships_feelings',
+        `Feelings for ${normalizeText(
+          rel.feelings.person
+        )} — qualities: ${safeJoin(
+          rel.feelings.qualities
+        )}. Status: ${normalizeText(rel.feelings.status)}.`,
+        {
+          section: 'relationships',
+          subsection: 'feelings',
+          category: 'personal',
+          keywords: ['feelings', 'admiration', 'qualities', 'status'],
+        }
+      );
     }
 
     // Current feelings/crush
     if (rel.crush) {
-      chunks.push({
-        id: 'relationships_crush',
-        content: `Sameer has unexpressed feelings for ${
-          rel.crush.name
-        }. He admires qualities such as ${rel.crush.qualities?.join(
-          ', '
-        )}. Status: ${rel.crush.status}. ${rel.crush.feelings}`,
-        metadata: {
+      pushChunk(
+        chunks,
+        'relationships_crush',
+        `Crush: ${normalizeText(rel.crush.name)}. Qualities: ${safeJoin(
+          rel.crush.qualities
+        )}. Status: ${normalizeText(rel.crush.status)}. ${normalizeText(
+          rel.crush.feelings
+        )}.`,
+        {
           section: 'relationships',
           subsection: 'crush',
           category: 'personal',
-          keywords: ['crush', 'feelings', 'unexpressed', 'nikita'],
-        },
-      });
+          keywords: ['crush', 'feelings', 'unexpressed'],
+        }
+      );
     }
 
     // Ex-relationships
     if (rel.ex_relationships && Array.isArray(rel.ex_relationships)) {
       rel.ex_relationships.forEach((ex: any, i: number) => {
-        chunks.push({
-          id: `relationships_ex_${i}`,
-          content: `Ex-girlfriend: ${ex.name}. Qualities: ${ex.qualities?.join(
-            ', '
-          )}. Reason for breakup: ${ex.reason}. ${
-            ex.note ? `Note: ${ex.note}` : ''
+        pushChunk(
+          chunks,
+          `relationships_ex_${i}`,
+          `Ex: ${normalizeText(ex.name)}. Qualities: ${safeJoin(
+            ex.qualities
+          )}. Reason: ${normalizeText(ex.reason)}. ${
+            ex.note ? `Note: ${normalizeText(ex.note)}` : ''
           }`,
-          metadata: {
+          {
             section: 'relationships',
             subsection: 'ex_relationships',
             category: 'personal',
-            keywords: ['ex', 'girlfriend', 'past', 'relationship'],
-          },
-        });
+            keywords: ['ex', 'past', 'relationship'],
+          }
+        );
       });
     }
 
     // Family
     if (rel.family) {
-      chunks.push({
-        id: 'relationships_family',
-        content: `Family: Mother - ${rel.family.mother}. Father - ${
-          rel.family.father
-        }. Sisters: ${rel.family.sister?.join(', ')}.`,
-        metadata: {
+      pushChunk(
+        chunks,
+        'relationships_family',
+        `Family — Mother: ${normalizeText(
+          rel.family.mother
+        )}. Father: ${normalizeText(rel.family.father)}. Sisters: ${safeJoin(
+          rel.family.sisters
+        )}. Brothers: ${safeJoin(rel.family.brothers)}. Friends: ${safeJoin(
+          rel.family.friends
+        )}.`,
+        {
           section: 'relationships',
           subsection: 'family',
           category: 'personal',
-          keywords: ['family', 'mother', 'father', 'sister', 'sayali', 'pooja'],
-        },
-      });
+          keywords: [
+            'family',
+            'mother',
+            'father',
+            'sisters',
+            'brothers',
+            'friends',
+          ],
+        }
+      );
     }
   }
 
   // Goals Processing
   if (data.goals) {
     if (data.goals.immediate) {
-      chunks.push({
-        id: 'goals_immediate',
-        content: `Immediate goals: ${data.goals.immediate.join(', ')}`,
-        metadata: {
+      pushChunk(
+        chunks,
+        'goals_immediate',
+        `Immediate goals: ${safeJoin(data.goals.immediate)}`,
+        {
           section: 'goals',
           subsection: 'immediate',
           category: 'professional',
           keywords: ['goals', 'mvp', 'client', 'revenue', 'immediate'],
-        },
-      });
+        }
+      );
     }
 
     if (data.goals.long_term) {
-      chunks.push({
-        id: 'goals_longterm',
-        content: `Long-term goals: ${data.goals.long_term.join(', ')}`,
-        metadata: {
+      pushChunk(
+        chunks,
+        'goals_longterm',
+        `Long-term goals: ${safeJoin(data.goals.long_term)}`,
+        {
           section: 'goals',
           subsection: 'long_term',
           category: 'mixed',
@@ -425,22 +563,25 @@ export function chunkKnowledgeBase(data: KnowledgeBase): KnowledgeChunk[] {
             'marriage',
             'impact',
           ],
-        },
-      });
+        }
+      );
     }
   }
 
   // Contact Information
   if (data.contact) {
-    chunks.push({
-      id: 'contact_info',
-      content: `Contact Sameer directly at ${data.contact.phone}. ${data.contact.fallback}`,
-      metadata: {
+    pushChunk(
+      chunks,
+      'contact_info',
+      `Contact: ${normalizeText(data.contact.phone)}. ${normalizeText(
+        data.contact.fallback
+      )}`,
+      {
         section: 'contact',
         category: 'contact',
         keywords: ['contact', 'phone', 'call', 'reach', 'ask directly'],
-      },
-    });
+      }
+    );
   }
 
   return chunks;

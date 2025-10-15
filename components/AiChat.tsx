@@ -31,6 +31,7 @@ import { Loader } from '@/components/ai-elements/loader';
 import { Suggestion, Suggestions } from './ai-elements/suggestion';
 import { Image } from '@/components/ai-elements/image';
 import { Sparkles, Heart } from 'lucide-react';
+import { AnimatedBeamMultipleOutput } from './ui/animated-beam';
 
 const AiChat = () => {
   const [input, setInput] = useState('');
@@ -73,6 +74,7 @@ const AiChat = () => {
         Ready to dive into some real talk about love, relationships, and life?
         Ask me anything or pick a question below! 💕
       </p>
+      <AnimatedBeamMultipleOutput />
     </div>
   );
 
